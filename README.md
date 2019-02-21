@@ -46,8 +46,8 @@ But command-line arguments will override `config.json` the launch.
     --config=<filename> - Load a config file and monitor for changes, reloads automatically.
     --monitor_config=True - Monitor for configuration changes or not (Default True/Yes)
     --partition=/ - Monitor for free space, pauses capture when we go below --reserved
-    --reserved=10 - Will pause capture when below 10% (default)
-    --flushlimit=5 - Will flush old pcap's when disk space is below 5% (default)
+    --reserved=10 - Will pause capture when disk-space is below 10% (default)
+    --flushlimit=5 - Will delete old pcap's when disk space is below 5% (default)
     --profile=<profile name> - Which profile to run in the config
                               (This option overrides "profile" in the config)
     --instances=1 - How many threads should we run? (Default is 1)
