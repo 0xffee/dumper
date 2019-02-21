@@ -29,7 +29,7 @@
 
 Or simply via any command line:
 
-    # python dumper.py --output=./capture_eno1_%Y-%m-%d_%H:%M:%S_pcap --interface=eno1 --partition=/ --reserved=10 --flushlimit=5 --config=/etc/dumper.json
+    # python dumper.py --output=./capture_eno1_%Y-%m-%d_%H:%M:%S.pcap --interface=eno1 --partition=/ --reserved=10 --flushlimit=5 --config=/etc/dumper.json
 
 # Configuration
 
