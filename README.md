@@ -27,6 +27,10 @@
     # systemctl enable dumper@eno1.service
     # systemctl start dumper@eno1.service
 
+Or simply via any command line:
+
+    # python dumper.py --output=./capture_eno1_%Y-%m-%d_%H:%M:%S_pcap --interface=eno1 --partition=/ --reserved=10 --flushlimit=5 --config=/etc/dumper.json
+
 # Configuration
 
 Most tcpdump related configuration *(filters, parameters etc)* is done in `config.json`.<br>
