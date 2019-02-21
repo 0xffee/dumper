@@ -1,0 +1,12 @@
+{
+	"profile" : "default",
+	"profiles" : {
+		"default" : {
+			"parameters" : ["-i {interface}", "-s 0", "-w {output}", "-vv", "-G 3600", "-z gzip", "-Z {cwd_owner}"],
+			"filters" : [
+				"not arp",
+				"not broadcast"
+			]
+		}
+	}
+}
