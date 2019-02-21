@@ -10,8 +10,6 @@
  * python-systemd [lib]
  * python-psutil [lib] - (optional, but strongly recommended)
 
-<br>
-
 ## Manual installation
 
     # mkdir -p /etc/dumper
