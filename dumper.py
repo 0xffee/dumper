@@ -6,7 +6,6 @@ from select import epoll, EPOLLIN, EPOLLHUP
 from systemd.journal import JournalHandler
 from hashlib import sha512
 try:
-	raise KeyError("CentOS shit")
 	import psutil
 except:
 	## Time to monkey patch in all the stats as if the real psutil existed.
