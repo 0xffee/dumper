@@ -6,9 +6,9 @@ from select import epoll, EPOLLIN, EPOLLHUP
 from systemd.journal import JournalHandler
 from hashlib import sha512
 try:
+	raise KeyError("CentOS shit")
 	import psutil
 except:
-	print('psutil is not installed. Mocking best effort replacement.')
 	## Time to monkey patch in all the stats as if the real psutil existed.
 
 	class mem():
@@ -46,7 +46,7 @@ except:
 			disk_stats = os.statvfs(partition)
 			free_size = disk_stats.f_bfree * disk_stats.f_bsize
 			disk_size = disk_stats.f_blocks * disk_stats.f_bsize
-			percent = (100/disk_size)*disk_free
+			percent = (100/disk_size)*free_size
 			return disk(disk_size, free_size, percent)
 
 		def net_if_addrs():
@@ -193,11 +193,12 @@ class cmd(Popen):
 
 class tcpdump(Thread):
 	def __init__(self, config):
-		super(tcpdump, self).__init__()
+		Thread.__init__(self)
 		self.config = config
 		self.last_notification = time.time()
 		self.runtime = time.time()
 		self.worker = None
+		log.info("Starting a dump thread to {}".format(self.config['output']))
 		self.start()
 
 	def run(self):
@@ -207,14 +208,24 @@ class tcpdump(Thread):
 		filters = ' '.join(self.config['profiles'][self.config['profile']]['parameters'])
 		filters += ' {}'.format(' and '.join(self.config['profiles'][self.config['profile']]['filters']))
 		filters = filters.format(**self.config)
-		with cmd(f"tcpdump {filters}") as self.worker:
-			while self.worker.poll() is None and time.time()-self.runtime < self.config['runtime']:
+		with cmd(f"{self.config['binary']} {filters}") as self.worker:
+			while self.worker.poll() is None and self.config['runtime'] and time.time()-self.runtime < self.config['runtime']:
 				for line in self.worker:
 					# Every 15min, log how many packets we got
 					# or if the line is something other than "Got X"
 					if line[:4] != b'Got ' or time.time() - self.last_notification > 60*15:
 						log.info(line.strip().decode('UTF-8'))
 						self.last_notification = time.time()
+
+			if self.config['runtime'] and time.time()-self.runtime > self.config['runtime']:
+				# We've exceeded runtime for this thread,
+				# We'll spawn a new one before we close the old one.
+				log.info("Maximum runtime for tcpdump has been reached. Rotating due to time.")
+				UID = gen_uid()
+				workers[UID] = tcpdump(self.config)
+				while workers[UID].isAlive() is False:
+					time.sleep(0.025)
+
 
 signal.signal(signal.SIGINT, sig_handler)
 ## And add some defaults if they are missing
@@ -224,7 +235,7 @@ if 'config' in args and os.path.isfile(args['config']):
 #		args = json.load(conf)
 	args['monitor_config'] = args['config']
 	check_config_changes()
-if not 'config' in args:
+else:
 	args['config'] = {
 		"profile" : "default",
 		"profiles" : {
@@ -238,15 +249,25 @@ if not 'config' in args:
 		}
 	}
 
+if not 'binary' in args: args['binary'] = 'tcpdump' # Great for specifying where tcpdump lives
 if not 'instances' in args: args['instances'] = 1
 if not 'interface' in args: args['interface'] = sorted([x for x in psutil.net_if_addrs().keys() if not x == 'lo'])[0]
 if not 'partition' in args: args['partition'] = '/'
 if not 'runtime' in args: args['runtime'] = 60*60 # Default to 1h
 if not 'output' in args: args['output'] = f'./capture_{args["interface"]}_%Y-%m-%d_%H:%M:%S.pcap'
 if not 'cwd_owner' in args: args['cwd_owner'] = pwd.getpwuid(os.stat(os.path.split(args['output'])[0]).st_uid)[0]
-if not 'profile' in args: args['profile'] = None
+if not 'profile' in args: args['profile'] = 'default'
 if not 'reserved' in args: args['reserved'] = 10
 if not 'flushlimit' in args: args['flushlimit'] = 5
+if not 'profiles' in args: args['profiles'] = {
+									"default" : {
+										"parameters" : ["-i {interface}", "-s 0", "-w {output}", "-vv", "-G 3600", "-z gzip", "-Z {cwd_owner}"],
+										"filters" : [
+											"not arp",
+											"not broadcast"
+										]
+									}
+								}
 
 ## Low odds if you're using a date format on the file.
 ## But we'll keep backing up file instead of overwriting just in case.
@@ -327,4 +348,4 @@ while 1:
 			workers[UID].join()
 			del workers[UID]
 
-	time.sleep(1)
+	time.sleep(0.025)
