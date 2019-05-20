@@ -6,3 +6,6 @@ Type=oneshot
 ExecStart=/usr/bin/python3 /usr/bin/dumper.py --output=/root/capture_%i_%%Y-%%m-%%d_%%H:%%M:%%S.pcap --interface=%i --partition=/ --reserved=10 --flushlimit=5 --config=/etc/dumper/dumper.json
 User=root
 Group=root
+
+[Install]
+WantedBy=multi-user.target
