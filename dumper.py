@@ -205,7 +205,7 @@ class tcpdump(Thread):
 			raise KeyError(f"Selected profile {self.config['profile']} is not configured.")
 
 		filters = ' '.join(self.config['profiles'][self.config['profile']]['parameters'])
-		filters += ' {}'.format(' and '.join(self.config['profiles'][self.config['profile']]['filters']))
+		filters += ' "{}"'.format(' and '.join(self.config['profiles'][self.config['profile']]['filters']))
 		filters = filters.format(**self.config)
 		with cmd(f"{self.config['binary']} {filters}") as self.worker:
 			while self.worker.poll() is None and self.config['runtime'] and time.time()-self.runtime < self.config['runtime']:
