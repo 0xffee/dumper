@@ -16,9 +16,9 @@
     # cp config.json /etc/dumper/
     # chmod 440 /etc/dumper/*
 
-    # cp dumper.py /usr/bin/dumper
-    # chmod 440 /usr/bin/dumper
-    # chmod +x /usr/bin/dumper
+    # cp dumper.py /usr/bin/dumper.py
+    # chmod 440 /usr/bin/dumper.py
+    # chmod +x /usr/bin/dumper.py
 
     # cp systemd/* /etc/systemd/system/
 
