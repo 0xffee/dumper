@@ -308,7 +308,7 @@ while 1:
 	if disk_free < args['flushlimit']:
 		clear_old_pcaps(start_time)
 	
-	if disk_free < args['reserved']:
+	if 100-disk_free < args['reserved']:
 		if not logged:
 			log.info("Running low on disk space, pausing full packet capture.")
 			logged = time.time()
